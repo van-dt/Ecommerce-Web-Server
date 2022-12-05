@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+    #PHP Service
+    laravel-app:
+        image: ecommerce-server/laravel:v0
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html
+
+    # NGINX Service
+    web-server:
+        image: nginx:1.17-alpine
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./:/var/www/html
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
