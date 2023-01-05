@@ -23,19 +23,8 @@ class Image extends Model
     {
         return $this->created_at->diffForHumans();
     }
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'auth_by');
-    }
     public function getSizeInKbAttribute()
     {
         return round($this->size / 1024, 2);
-    }
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($image) {
-            $image->auth_by = auth()->user()->id;
-        });
     }
 }
