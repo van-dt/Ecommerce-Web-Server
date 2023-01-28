@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ProductController;
 
 /*
@@ -18,5 +20,34 @@ use App\Http\Controllers\ProductController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// auth
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
 
-Route::resource('/product',ProductController::class)->except(['create','edit']);
+], function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::post('/change-pass', [AuthController::class, 'changePassWord']);
+});
+// upload image
+Route::post('/upload', [ImageController::class,'postUpload']);
+// products
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'products'
+
+], function () {
+   
+    Route::get('/all', [ProductController::class,'index']);
+    Route::get('/{id}', [ProductController::class,'show']);
+    Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
+    Route::post('/store-userid={id}', [ProductController::class,'store']);
+    route::post('/update-id={id}', [ProductController::class,'update']);
+});
+
+
+

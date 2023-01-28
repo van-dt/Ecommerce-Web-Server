@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model {
-  use HasFactory;
+class Product extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'pname',
+        'description',
+        'quantity',
+        'price',
+        'userID',
+        'photoURL'
+    ];
+    public $timestamps = true;
 
-  protected $primaryKey = "id";
-
-  protected $fillable = ["name","price"];
-
-  public $timestamps = true;
 }
