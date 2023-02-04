@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PaymentController;
+
 
 
 /*
@@ -60,4 +62,16 @@ Route::group([
     Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
     Route::post('/store', [ProductController::class,'store']);
     route::post('/update-id={id}', [ProductController::class,'update']);
+});
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'payments'
+
+], function () {
+   
+    Route::get('/all', [PaymentController::class,'index']);
+    Route::get('/{id}', [PaymentController::class,'show']);
+    Route::post('/delete', [PaymentController::class,'destroy']);
+    Route::post('/store', [PaymentController::class,'store']);
+    route::post('/update', [PaymentController::class,'update']);
 });

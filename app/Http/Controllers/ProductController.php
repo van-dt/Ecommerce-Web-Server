@@ -47,15 +47,16 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         //
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id(); 
+        // Auth::check() ? Auth::user()->id : null;
+        // $id = Auth::id(); 
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
-             'cate_id'=>'required|integer',        
+             'cate_id'=>'required|integer',    
+             'userID' =>'required|integer'
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())
@@ -71,7 +72,7 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$id,
+        'userID'=>$request->userID,
         'cate_id'=>$request->cate_id
     ];
     $newProduct = Product::create($dataInsert);
