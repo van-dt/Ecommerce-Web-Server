@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -46,4 +48,16 @@ Route::group([
     Route::delete('/delete-id={id}', [CategoryController::class,'destroy']);
     Route::post('/store', [CategoryController::class,'store']);
     route::post('/update-id={id}', [CategoryController::class,'update']);
+});
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'products'
+
+], function () {
+   
+    Route::get('/all', [ProductController::class,'index']);
+    Route::get('/{id}', [ProductController::class,'show']);
+    Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
+    Route::post('/store', [ProductController::class,'store']);
+    route::post('/update-id={id}', [ProductController::class,'update']);
 });
