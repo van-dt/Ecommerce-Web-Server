@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +35,15 @@ Route::group([
 });
 // upload image
 Route::post('/upload', [ImageController::class,'postUpload']);
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'categories'
+
+], function () {
+   
+    Route::get('/all', [CategoryController::class,'index']);
+    Route::get('/{id}', [CategoryController::class,'show']);
+    Route::delete('/delete-id={id}', [CategoryController::class,'destroy']);
+    Route::post('/store', [CategoryController::class,'store']);
+    route::post('/update-id={id}', [CategoryController::class,'update']);
+});
