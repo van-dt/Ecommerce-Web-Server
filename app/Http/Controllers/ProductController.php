@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use GuzzleHttp\Handler\Proxy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Validator;
 class ProductController extends Controller
 {
     /**
@@ -45,27 +46,20 @@ class ProductController extends Controller
     public function store(Request $request,$id)
     {
         //
-        $request->validate([
+        $rule= array(
             'pname'=>'required',
              'description'=>'required',
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
-             'photoURL'=>'required|image|max:2000'
-        ],
-        [
-            'pname.reyuired'=>'Phải điền tên sản phẩm',
-            'description.required'=>"Phải điền mô tả",
-            'quantity.required'=>'Phải điền số lượng',
-            'quantity.integer'=> 'Số lượng phải nguyên',
-            'quantity.min'=>'số lượng phải lớn hơn 0',
-            'price.required'=>'Phải có giá',
-            'price.integer'=>'giá tiền phải là số nguyên',
-            'price.min'=> 'giá tiền không thể là số âm',
-            'photoURL.required'=>'Cần có ảnh mô tả',
-            'photoURL.max'=>'Ảnh quá lớn',
-            'photoURL.image'=>'Phải là ảnh'
-        ]
+             'photoURL'=>'required|image|max:2000',
+             'cate_id'=>'required|integer',        
     );
+    $validator =  Validator::make($request->all(),$rule);
+    if($validator->fails())
+    {
+            return $validator->errors();
+    }
+
 
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
@@ -74,7 +68,8 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$id
+        'userID'=>$id,
+        'cate_id'=>$request->cate_id
     ];
     $newProduct = Product::create($dataInsert);
    // echo $dataInsert['photoURL'];
@@ -116,29 +111,21 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $rule= array(
             'pname'=>'required',
              'description'=>'required',
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
+             'cate_id'=>'required|integer',
              'userID'=>'required|integer|min:0'
-        ],
-        [
-            'pname.reyuired'=>'Phải điền tên sản phẩm',
-            'description.required'=>"Phải điền mô tả",
-            'quantity.required'=>'Phải điền số lượng',
-            'quantity.integer'=> 'Số lượng phải nguyên',
-            'quantity.min'=>'số lượng phải lớn hơn 0',
-            'price.required'=>'Phải có giá',
-            'price.integer'=>'giá tiền phải là số nguyên',
-            'price.min'=> 'giá tiền không thể là số âm',
-            'photoURL.required'=>'Cần có ảnh mô tả',
-            'photoURL.max'=>'Ảnh quá lớn',
-            'photoURL.image'=>'Phải là ảnh'
-        ]
+        
     );
-
+    $validator =  Validator::make($request->all(),$rule);
+    if($validator->fails())
+    {
+            return $validator->errors();
+    }
     $productUpdate = Product::find($id);
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
@@ -147,7 +134,8 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$request->userID
+        'userID'=>$request->userID,
+        'cate_id'=>$request->cate_id
     ];
     $productUpdate->update($dataInsert);
     return new ProductResource($productUpdate);

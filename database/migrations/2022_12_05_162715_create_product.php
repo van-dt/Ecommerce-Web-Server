@@ -16,10 +16,12 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->increments('id');
             $table->string('pname');
+            $table->string('description');
             $table->decimal('price');
             $table->integer('quantity');
             $table->integer('userID');
             $table->string( 'photoURL');
+            $table->integer('cate_id');
        
             $table->timestamp('created_at')->default(now()->toDateTimeString());
             $table->timestamp('updated_at')->default(now()->toDateTimeString());
