@@ -69,9 +69,8 @@ Route::group([
 
 ], function () {
    
-    Route::get('/all', [PaymentController::class,'index']);
-    Route::get('/{id}', [PaymentController::class,'show']);
-    Route::post('/delete', [PaymentController::class,'destroy']);
+    Route::get('/', [PaymentController::class,'show']);
+    Route::delete('/delete-id={productID}', [PaymentController::class,'destroy']);
     Route::post('/store', [PaymentController::class,'store']);
-    route::post('/update', [PaymentController::class,'update']);
+    route::post('/update-id={productID}', [PaymentController::class,'update']);
 });

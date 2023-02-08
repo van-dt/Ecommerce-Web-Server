@@ -160,6 +160,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+        
         $productDelete = Product::find($id);
         $productDelete->delete();
         return $id;

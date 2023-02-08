@@ -7,6 +7,7 @@ use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -39,24 +40,34 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Auth::check() ? Auth::user()->id : null;
+        $id = Auth::id();
         $request->validate([
-            'userID'=>'required',
+           
             'productID'=>'required',
             'quantity'=>'required'
         ]
     );
     $status =0;
     $dataInsert = [
-        'userID'=>$request->userID,
+        'userID'=>$id,
         'productID'=>$request->productID,
         'quantity'=>$request->quantity,
         'status'=>$status
         
     ];
-    $newPayment = Payment::create($dataInsert);
+        
+    $payments = DB::table('payments')->selectRaw('`userID`,`productID`,sum(quantity) as quantity')->where([['userID','=', $id],['productID','=',$request->productID]])->count();
+    if($payments>0)
+    { 
+        $productID = $request->productID;
+        DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
+    }
+    else
+    {
+    $newPayment = Payment::create($dataInsert); return $newPayment;}
    // echo $dataInsert['photoURL'];
-    return $newPayment;
+    //eturn $newPayment;
 
     }
 
@@ -66,9 +77,19 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show()
     {
-        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,sum(quantity) as quantity')->where('userID', $id)->groupBy('productID')->get();
+        Auth::check() ? Auth::user()->id : null;
+        $id = Auth::id();
+        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`')->where('userID', $id)->get();
+        $userName = DB::table('users')->selectRaw('`name`')->where('id', $id)->get();
+
+        foreach($payments as $payment)
+        {
+            $payment->userName = $userName;
+            $payment->productName = DB::table('products')->selectRaw('`pname`')->where('id', $payment->productID)->get();
+
+        }
         return new PaymentResource($payments);
        // $product = Product::where('id', '=', $id)->get();
        // return ProductResources::collection($product);
@@ -94,18 +115,16 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request,$productID)
     {
+        Auth::check() ? Auth::user()->id : null;
+        $id = Auth::id();
         $request->validate([
-            'userID'=>'required',
-            'productID'=>'required',
             'quantity'=>'required',
             'status'=>'required'
         ]
     );
-    $userID= $request->userID;
-    $productID = $request->productID;
-    DB::table('payments')->where([['userID','=', $userID],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
+    DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
 
    
    // return new PaymentResource($paymentUpdate);
@@ -117,20 +136,13 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy($productID)
     {
-        $rule = array(
-            'userID'=>'required',
-            'productID'=>'required',
-    );
-    $validator =  Validator::make($request->all(),$rule);
-    if($validator->fails())
-    {
-            return $validator->errors();
-    }
-    $userID= $request->userID;
-    $productID = $request->productID;
-     DB::table('payments')->where([['userID','=', $userID],['productID','=',$productID]])->delete();
+        Auth::check() ? Auth::user()->id : null;
+        $id = Auth::id();
+        
+     DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->delete();
+     return $productID;
         
     }
 }
