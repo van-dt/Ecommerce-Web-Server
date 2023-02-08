@@ -46,9 +46,10 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        // Auth::check() ? Auth::user()->id : null;
-        // $id = Auth::id(); 
+        
+        Auth::check() ? Auth::user()->id : null;
+        $id = Auth::id(); 
+       // dd($id);
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -56,7 +57,7 @@ class ProductController extends Controller
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
              'cate_id'=>'required|integer',    
-             'userID' =>'required|integer'
+            //  'userID' =>'required|integer'
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())
@@ -72,7 +73,8 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$request->userID,
+        // 'userID'=>$request->userID,
+        'userID'=>$id,
         'cate_id'=>$request->cate_id
     ];
     $newProduct = Product::create($dataInsert);
@@ -90,6 +92,8 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::findOrFail($id);
+        $product->userName = $product->user->name;
+        $product->cateName = $product->category->name;
         return new ProductResource($product);
        // $product = Product::where('id', '=', $id)->get();
        // return ProductResources::collection($product);
@@ -115,16 +119,18 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+        $productUpdate = Product::find($id);
+       // dd($request);
+       Auth::check() ? Auth::user()->id : null;
+       $userid = Auth::id(); 
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
-             'cate_id'=>'required|integer',
-             'userID'=>'required|integer|min:0'
+             'cate_id'=>'required|integer'
+             
         
     );
     $validator =  Validator::make($request->all(),$rule);
@@ -132,7 +138,6 @@ class ProductController extends Controller
     {
             return $validator->errors();
     }
-    $productUpdate = Product::find($id);
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
         'pname'=>$request->pname,
@@ -140,7 +145,7 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$request->userID,
+        'userID'=> $userid,
         'cate_id'=>$request->cate_id
     ];
     $productUpdate->update($dataInsert);

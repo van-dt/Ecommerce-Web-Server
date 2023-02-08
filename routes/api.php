@@ -57,7 +57,7 @@ Route::group([
 
 ], function () {
    
-    Route::get('/all', [ProductController::class,'index']);
+    Route::get('/', [ProductController::class,'index']);
     Route::get('/{id}', [ProductController::class,'show']);
     Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
     Route::post('/store', [ProductController::class,'store']);
