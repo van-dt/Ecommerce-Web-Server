@@ -14,12 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::create('payments', function (Blueprint $table) {
-            
+
             $table->integer('userID');
             $table->integer('productID');
             $table->integer('quantity');
             $table->tinyInteger('status');
-            $table->timestamps();
+            $table->timestamp('created_at')->default(now()->toDateTimeString());
+            $table->timestamp('updated_at')->default(now()->toDateTimeString());
         });
     }
 
