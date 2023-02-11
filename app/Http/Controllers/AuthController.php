@@ -80,7 +80,10 @@ class AuthController extends Controller
     public function logout() {
         auth()->logout();
 
-        return response()->json(['message' => 'User successfully signed out']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Người dùng đã đăng xuất thành công!!'
+        ]);
     }
 
     /**
