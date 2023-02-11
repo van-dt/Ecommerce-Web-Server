@@ -39,7 +39,9 @@ Route::group([
 });
 // upload image
 Route::post('/upload', [ImageController::class,'postUpload']);
-
+// categories
 Route::resource('/categories',CategoryController::class)->except(['create','edit']);
+// products
 Route::resource('/products',ProductController::class)->except(['create','edit']);
+// payments
 Route::resource('/payments',PaymentController::class)->except(['create','edit']);
