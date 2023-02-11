@@ -39,39 +39,9 @@ Route::group([
 });
 // upload image
 Route::post('/upload', [ImageController::class,'postUpload']);
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'categories'
-
-], function () {
-   
-    Route::get('/all', [CategoryController::class,'index']);
-    Route::get('/{id}', [CategoryController::class,'show']);
-    Route::delete('/delete-id={id}', [CategoryController::class,'destroy']);
-    Route::post('/store', [CategoryController::class,'store']);
-    route::post('/update-id={id}', [CategoryController::class,'update']);
-});
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'products'
-
-], function () {
-   
-    Route::get('/all', [ProductController::class,'index']);
-    Route::get('/{id}', [ProductController::class,'show']);
-    Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
-    Route::post('/store', [ProductController::class,'store']);
-    route::post('/update-id={id}', [ProductController::class,'update']);
-});
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'payments'
-
-], function () {
-   
-    Route::get('/all', [PaymentController::class,'index']);
-    Route::get('/{id}', [PaymentController::class,'show']);
-    Route::post('/delete', [PaymentController::class,'destroy']);
-    Route::post('/store', [PaymentController::class,'store']);
-    route::post('/update', [PaymentController::class,'update']);
-});
+// categories
+Route::resource('/categories',CategoryController::class)->except(['create','edit']);
+// products
+Route::resource('/products',ProductController::class)->except(['create','edit']);
+// payments
+Route::resource('/payments',PaymentController::class)->except(['create','edit']);
