@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
-use GuzzleHttp\Handler\Proxy;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -21,11 +20,11 @@ class ProductController extends Controller
     {
         //
         $products = Product::paginate(15);
-        
+
         return ProductResource::collection($products);
    // $pr=  DB::select('select * from products where userID =?',[73]);
 
-       
+
     }
 
     /**
@@ -48,14 +47,14 @@ class ProductController extends Controller
     {
         //
         Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id(); 
+        $id = Auth::id();
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
-             'cate_id'=>'required|integer',        
+             'cate_id'=>'required|integer',
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())
@@ -89,6 +88,8 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::findOrFail($id);
+        $owner = User::findOrFail($product->userID);
+        $product->owner = $owner->name;
         return new ProductResource($product);
        // $product = Product::where('id', '=', $id)->get();
        // return ProductResources::collection($product);
@@ -124,7 +125,7 @@ class ProductController extends Controller
              'photoURL'=>'required|image|max:2000',
              'cate_id'=>'required|integer',
              'userID'=>'required|integer|min:0'
-        
+
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())

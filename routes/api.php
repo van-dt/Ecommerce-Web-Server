@@ -42,22 +42,11 @@ Route::group([
     'prefix' => 'categories'
 
 ], function () {
-   
     Route::get('/all', [CategoryController::class,'index']);
     Route::get('/{id}', [CategoryController::class,'show']);
     Route::delete('/delete-id={id}', [CategoryController::class,'destroy']);
     Route::post('/store', [CategoryController::class,'store']);
     route::post('/update-id={id}', [CategoryController::class,'update']);
 });
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'products'
 
-], function () {
-   
-    Route::get('/all', [ProductController::class,'index']);
-    Route::get('/{id}', [ProductController::class,'show']);
-    Route::delete('/delete-id={id}', [ProductController::class,'destroy']);
-    Route::post('/store', [ProductController::class,'store']);
-    route::post('/update-id={id}', [ProductController::class,'update']);
-});
+Route::resource('/products',ProductController::class)->except(['create','edit']);
