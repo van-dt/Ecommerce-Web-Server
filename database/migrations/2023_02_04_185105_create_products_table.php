@@ -17,7 +17,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('pname');
             $table->string('description');
-            $table->decimal('price');
+            $table->bigInteger('price');
             $table->integer('quantity');
             $table->integer('userID');
             $table->string( 'photoURL');

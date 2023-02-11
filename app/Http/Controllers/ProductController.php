@@ -45,7 +45,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
         Auth::check() ? Auth::user()->id : null;
         $id = Auth::id();
         $rule= array(
@@ -70,6 +70,7 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
+        // 'userID'=>$request->userID,
         'userID'=>$id,
         'cate_id'=>$request->cate_id
     ];
@@ -88,11 +89,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::findOrFail($id);
-        $owner = User::findOrFail($product->userID);
-        $product->owner = $owner->name;
         return new ProductResource($product);
-       // $product = Product::where('id', '=', $id)->get();
-       // return ProductResources::collection($product);
     }
 
     /**
@@ -115,8 +112,10 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+        $productUpdate = Product::find($id);
+       // dd($request);
+       Auth::check() ? Auth::user()->id : null;
+       $userid = Auth::id();
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -132,7 +131,6 @@ class ProductController extends Controller
     {
             return $validator->errors();
     }
-    $productUpdate = Product::find($id);
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
         'pname'=>$request->pname,
@@ -140,7 +138,7 @@ class ProductController extends Controller
         'quantity'=>$request->quantity,
         'price'=>$request->price,
         'photoURL'=>$path,
-        'userID'=>$request->userID,
+        'userID'=> $userid,
         'cate_id'=>$request->cate_id
     ];
     $productUpdate->update($dataInsert);
@@ -155,6 +153,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+
         $productDelete = Product::find($id);
         $productDelete->delete();
         return $id;
