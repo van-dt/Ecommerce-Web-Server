@@ -40,8 +40,13 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
         $request->validate([
            
             'productID'=>'required',
@@ -79,9 +84,14 @@ class PaymentController extends Controller
      */
     public function show()
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
-        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`')->where('userID', $id)->get();
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
+        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`')->where(['userID','=', $id],['status','=',0])->get();
         $userName = DB::table('users')->selectRaw('`name`')->where('id', $id)->get();
 
         foreach($payments as $payment)
@@ -117,8 +127,13 @@ class PaymentController extends Controller
      */
     public function update(Request $request,$productID)
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
         $request->validate([
             'quantity'=>'required',
             'status'=>'required'
@@ -138,11 +153,21 @@ class PaymentController extends Controller
      */
     public function destroy($productID)
     {
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
         
      DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->delete();
      return $productID;
         
+    }
+    public function cartcount()
+    {
+        $countcart = Payment::where('userID',Auth::id())->where('status',0)->count();
+        return response()->json(['count'=>$countcart]);
     }
 }

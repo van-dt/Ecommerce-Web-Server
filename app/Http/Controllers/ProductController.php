@@ -45,9 +45,15 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
 
-        Auth::check() ? Auth::user()->id : null;
-        $id = Auth::id();
+      
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -112,10 +118,15 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $productUpdate = Product::find($id);
+        $productUpdate = Product::firstOrFail($id);
        // dd($request);
-       Auth::check() ? Auth::user()->id : null;
-       $userid = Auth::id();
+       if(Auth::check())
+        {
+            $userid = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -154,7 +165,16 @@ class ProductController extends Controller
     public function destroy($id)
     {
 
-        $productDelete = Product::find($id);
+        if(Auth::check())
+        {
+            $userid = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
+        $productDelete = Product::firstOrFail($id);
+        if($productDelete->user->id != $userid ) return response()->json(['error' => 'Unauthorized'], 401);
+
         $productDelete->delete();
         return $id;
     }

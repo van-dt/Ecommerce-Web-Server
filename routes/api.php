@@ -45,3 +45,19 @@ Route::resource('/categories',CategoryController::class)->except(['create','edit
 Route::resource('/products',ProductController::class)->except(['create','edit']);
 // payments
 Route::resource('/payments',PaymentController::class)->except(['create','edit']);
+//count cart
+Route::get('load-cart-data',[PaymentController::class,'cartcount']);
+// ajax cho cart neu can:
+// $.ajax(
+//     {
+//         method:"GET",
+//         url:"/load-cart-data",
+//         success:function(response)
+//         {
+//             $('.ten class').html();
+//             $('.ten class').html(response.count);
+            
+//         }
+
+//     }
+// );
