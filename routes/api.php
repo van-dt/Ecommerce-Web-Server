@@ -61,3 +61,8 @@ Route::get('load-cart-data',[PaymentController::class,'cartcount']);
 
 //     }
 // );
+
+//get products theo category
+Route::get('/products-by-cate',[ProductController::class,'suggestProdByCate']);
+Route::get('/products-by-user',[ProductController::class,'suggestProdByUser']);
+

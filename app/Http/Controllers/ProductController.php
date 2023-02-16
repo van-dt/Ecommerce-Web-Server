@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
@@ -178,4 +179,41 @@ class ProductController extends Controller
         $productDelete->delete();
         return $id;
     }
+    public function suggestProdByCate(Request $request)
+    {
+        
+        $rule= array(
+            'id'=>'required'
+        );
+
+       $validator =  Validator::make($request->all(),$rule);
+
+        if($validator->fails())
+        {
+              //  return $validator->errors();
+              return $request;
+        
+        }
+        $product = Product::where('id',$request->id)->first();
+        $productSugg = Product::where([['cate_id','=',$product->cate_id],['id','!=',$product->id]])->paginate(10);
+        return $productSugg;
+
+    }
+    public function suggestProdByUser(Request $request)
+    {
+        $rule= array(
+            'id'=>'required'
+        );
+
+       $validator =  Validator::make($request->all(),$rule);
+
+        if($validator->fails())
+        {
+                return $validator->errors();
+        }
+        $product = Product::where('id',$request->id)->first();
+        $productSugg = Product::where([['userID','=',$product->userID],['id','!=',$product->id]])->paginate(10);
+        return $productSugg;
+    }
+
 }
