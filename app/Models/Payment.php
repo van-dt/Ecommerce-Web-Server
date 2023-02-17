@@ -8,16 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     use HasFactory;
+    protected $table='payments';
+
     protected $fillable = [
         'userID',
         'productID',
         'quantity',
-        'status'
+        'status',
+        'select',
     ];
-    public $timestamps = true;
+    // public $timestamps = true;
+
     public function product()
     {
-        return $this->belongsTo(Category::class,'productID','id');
+        return $this->belongsTo(Product::class,'productID','id');
     }
     public function user()
     {

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -54,11 +56,13 @@ class PaymentController extends Controller
         ]
     );
     $status =0;
+    $select =0;
     $dataInsert = [
         'userID'=>$id,
         'productID'=>$request->productID,
         'quantity'=>$request->quantity,
-        'status'=>$status
+        'status'=>$status,
+        'select'=>$select
         
     ];
         
@@ -91,7 +95,7 @@ class PaymentController extends Controller
         else{
             return response()->json(['status'=>"Login to Continue"]);
         }
-        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`')->where(['userID','=', $id],['status','=',0])->get();
+        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`,`select`')->where(['userID','=', $id],['status','=',0])->get();
         $userName = DB::table('users')->selectRaw('`name`')->where('id', $id)->get();
 
         foreach($payments as $payment)
@@ -136,10 +140,10 @@ class PaymentController extends Controller
         }
         $request->validate([
             'quantity'=>'required',
-            'status'=>'required'
+            'select'=>'required'
         ]
     );
-    DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
+    DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update([['quantity'=>$request->quantity],['select'=>$request->select]]);
 
    
    // return new PaymentResource($paymentUpdate);
@@ -169,5 +173,40 @@ class PaymentController extends Controller
     {
         $countcart = Payment::where('userID',Auth::id())->where('status',0)->count();
         return response()->json(['count'=>$countcart]);
+    }
+    public function checkout()
+    {
+        if(Auth::check())
+        {
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['status'=>"Login to Continue"]);
+        }
+        $checkout = Payment::where([['userID','=',$id],['select','=',1]])->get();
+        $user = User::where('id',Auth::id())->first();
+
+       
+        foreach($checkout as $item)
+        {
+            $product= Product::where('id',$item->productID)->first();
+
+            $item->pname = $product->pname;
+            $item->userName = $user->name;
+            $item->address = $user->address;
+        }
+        return $checkout;
+    }
+    public function Purchase(Request $request)
+    {
+        if(Auth::user()->address==NULL)
+        {
+            $user = User::where('id',Auth::id())->first();
+            $user->address= $request->input('address');
+            $user->update();
+        }
+      Payment::where([['userID','=',Auth::id()],['select','=',1]])->update(['status'=>1]);
+
+
     }
 }
