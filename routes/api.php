@@ -4,6 +4,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PaymentController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +39,9 @@ Route::group([
 });
 // upload image
 Route::post('/upload', [ImageController::class,'postUpload']);
+// categories
+Route::resource('/categories',CategoryController::class)->except(['create','edit']);
+// products
+Route::resource('/products',ProductController::class)->except(['create','edit']);
+// payments
+Route::resource('/payments',PaymentController::class)->except(['create','edit']);
