@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('productID');
             $table->integer('quantity');
             $table->tinyInteger('status');
+            $table->tinyInteger('select');
             $table->timestamp('created_at')->default(now()->toDateTimeString());
             $table->timestamp('updated_at')->default(now()->toDateTimeString());
         });

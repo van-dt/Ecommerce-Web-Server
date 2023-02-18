@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Datetime;
+use Illuminate\Support\Facades\Auth;
+
 
 
 class AuthController extends Controller
@@ -38,7 +40,6 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
         return $this->createNewToken($token);
     }
 

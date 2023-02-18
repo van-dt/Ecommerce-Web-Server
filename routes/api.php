@@ -43,5 +43,29 @@ Route::post('/upload', [ImageController::class,'postUpload']);
 Route::resource('/categories',CategoryController::class)->except(['create','edit']);
 // products
 Route::resource('/products',ProductController::class)->except(['create','edit']);
-// payments
+// payments (payments crud la cart thong thuong, con show du thong tin payments se khac nha)
 Route::resource('/payments',PaymentController::class)->except(['create','edit']);
+//count cart
+Route::get('load-cart-data',[PaymentController::class,'cartcount']);
+// ajax cho cart neu can:
+// $.ajax(
+//     {
+//         method:"GET",
+//         url:"/load-cart-data",
+//         success:function(response)
+//         {
+//             $('.ten class').html();
+//             $('.ten class').html(response.count);
+            
+//         }
+
+//     }
+// );
+
+//get products theo category
+Route::get('/products-by-cate',[ProductController::class,'suggestProdByCate']);
+Route::get('/products-by-user',[ProductController::class,'suggestProdByUser']);
+//get checkout (thong tin mua hang)
+Route::get('/checkout',[PaymentController::class,'checkout']);
+Route::post('/purchase',[PaymentController::class,'purchase']);
+
