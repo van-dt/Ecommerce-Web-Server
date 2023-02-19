@@ -8,6 +8,8 @@ use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 class ProductController extends Controller
 {
     /**
@@ -17,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        Log::info('get all product');
         $products = Product::paginate(15);
 
         return ProductResource::collection($products);
@@ -49,7 +51,7 @@ class ProductController extends Controller
             $id = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=>true,'message'=>"Login to Continue"]);
         }
 
 
@@ -117,14 +119,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $productUpdate = Product::firstOrFail($id);
+        $productUpdate = Product::find($id);
        // dd($request);
        if(Auth::check())
         {
             $userid = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=> true,'message'=>"Login to Continue"]);
         }
         $rule= array(
             'pname'=>'required',
@@ -132,14 +134,12 @@ class ProductController extends Controller
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
-             'cate_id'=>'required|integer',
-             'userID'=>'required|integer|min:0'
-
+             'cate_id'=>'required|string',
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())
     {
-            return $validator->errors();
+            return response()->json(['error'=> true, 'message' => $validator->errors()]);
     }
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
@@ -147,7 +147,7 @@ class ProductController extends Controller
         'description'=>$request->description,
         'quantity'=>$request->quantity,
         'price'=>$request->price,
-        'photoURL'=>$path,
+        'photoURL'=>env('AWS_S3_URL').'/'.$path,
         'userID'=> $userid,
         'cate_id'=>$request->cate_id
     ];
@@ -163,16 +163,15 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-
         if(Auth::check())
         {
             $userid = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=> true,'message'=>"Login to Continue"]);
         }
-        $productDelete = Product::firstOrFail($id);
-        if($productDelete->user->id != $userid ) return response()->json(['error' => 'Unauthorized'], 401);
+        $productDelete = Product::find($id);
+        if($productDelete->user->id != $userid ) return response()->json(['error' =>true,'message'=> 'Unauthorized'], 401);
 
         $productDelete->delete();
         return $id;

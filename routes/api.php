@@ -45,9 +45,11 @@ Route::post('/upload', [ImageController::class,'postUpload']);
 // categories
 Route::resource('/categories',CategoryController::class)->except(['create','edit']);
 // products
-Route::resource('/products',ProductController::class)->except(['create','edit']);
+Route::resource('/products',ProductController::class)->except(['create','edit','update']);
+Route::post('/products/{id}',[ProductController::class,'update']);
 // payments
-Route::resource('/payments',PaymentController::class)->except(['create','edit']);
+Route::resource('/payments',PaymentController::class)->except(['index','create','edit']);
+Route::get('/payments',[PaymentController::class,'show']);
 //get products theo category
 Route::get('/products-by-cate/{id}',[ProductController::class,'suggestProdByCate']);
 Route::get('/products-by-user',[ProductController::class,'suggestProdByUser']);
