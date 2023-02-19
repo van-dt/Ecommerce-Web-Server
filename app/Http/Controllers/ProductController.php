@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -54,7 +52,7 @@ class ProductController extends Controller
             return response()->json(['status'=>"Login to Continue"]);
         }
 
-      
+
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -76,7 +74,7 @@ class ProductController extends Controller
         'description'=>$request->description,
         'quantity'=>$request->quantity,
         'price'=>$request->price,
-        'photoURL'=>$path,
+        'photoURL'=>env('AWS_S3_URL').'/'.$path,
         // 'userID'=>$request->userID,
         'userID'=>$id,
         'cate_id'=>$request->cate_id
@@ -179,39 +177,18 @@ class ProductController extends Controller
         $productDelete->delete();
         return $id;
     }
-    public function suggestProdByCate(Request $request)
+    public function suggestProdByCate($id)
     {
-        
-        $rule= array(
-            'id'=>'required'
-        );
-
-       $validator =  Validator::make($request->all(),$rule);
-
-        if($validator->fails())
-        {
-              //  return $validator->errors();
-              return $request;
-        
-        }
-        $product = Product::where('id',$request->id)->first();
+        $product = Product::where('id',$id)->first();
         $productSugg = Product::where([['cate_id','=',$product->cate_id],['id','!=',$product->id]])->paginate(10);
-        return $productSugg;
+
+        return ProductResource::collection($productSugg);
 
     }
-    public function suggestProdByUser(Request $request)
+
+    public function suggestProdByUser($id)
     {
-        $rule= array(
-            'id'=>'required'
-        );
-
-       $validator =  Validator::make($request->all(),$rule);
-
-        if($validator->fails())
-        {
-                return $validator->errors();
-        }
-        $product = Product::where('id',$request->id)->first();
+        $product = Product::where('id',$id)->first();
         $productSugg = Product::where([['userID','=',$product->userID],['id','!=',$product->id]])->paginate(10);
         return $productSugg;
     }

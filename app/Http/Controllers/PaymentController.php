@@ -17,11 +17,11 @@ class PaymentController extends Controller
     {
         //
         $payments = Payment::paginate(15);
-        
-        return PaymentResource::collection($payments);
-   
 
-       
+        return PaymentResource::collection($payments);
+
+
+
     }
 
     /**
@@ -50,7 +50,7 @@ class PaymentController extends Controller
             return response()->json(['status'=>"Login to Continue"]);
         }
         $request->validate([
-           
+
             'productID'=>'required',
             'quantity'=>'required'
         ]
@@ -63,12 +63,12 @@ class PaymentController extends Controller
         'quantity'=>$request->quantity,
         'status'=>$status,
         'select'=>$select
-        
+
     ];
-        
+
     $payments = DB::table('payments')->selectRaw('`userID`,`productID`,sum(quantity) as quantity')->where([['userID','=', $id],['productID','=',$request->productID]])->count();
     if($payments>0)
-    { 
+    {
         $productID = $request->productID;
         DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
     }
@@ -145,7 +145,7 @@ class PaymentController extends Controller
     );
     DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update([['quantity'=>$request->quantity],['select'=>$request->select]]);
 
-   
+
    // return new PaymentResource($paymentUpdate);
     }
 
@@ -164,10 +164,10 @@ class PaymentController extends Controller
         else{
             return response()->json(['status'=>"Login to Continue"]);
         }
-        
+
      DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->delete();
      return $productID;
-        
+
     }
     public function cartcount()
     {
@@ -186,7 +186,7 @@ class PaymentController extends Controller
         $checkout = Payment::where([['userID','=',$id],['select','=',1]])->get();
         $user = User::where('id',Auth::id())->first();
 
-       
+
         foreach($checkout as $item)
         {
             $product= Product::where('id',$item->productID)->first();
