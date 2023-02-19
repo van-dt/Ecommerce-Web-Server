@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 class ProductController extends Controller
 {
     /**
@@ -19,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        Log::info('get all product');
         $products = Product::paginate(15);
 
         return ProductResource::collection($products);
@@ -51,10 +51,10 @@ class ProductController extends Controller
             $id = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=>true,'message'=>"Login to Continue"]);
         }
 
-      
+
         $rule= array(
             'pname'=>'required',
              'description'=>'required',
@@ -76,7 +76,7 @@ class ProductController extends Controller
         'description'=>$request->description,
         'quantity'=>$request->quantity,
         'price'=>$request->price,
-        'photoURL'=>$path,
+        'photoURL'=>env('AWS_S3_URL').'/'.$path,
         // 'userID'=>$request->userID,
         'userID'=>$id,
         'cate_id'=>$request->cate_id
@@ -119,14 +119,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $productUpdate = Product::firstOrFail($id);
+        $productUpdate = Product::find($id);
        // dd($request);
        if(Auth::check())
         {
             $userid = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=> true,'message'=>"Login to Continue"]);
         }
         $rule= array(
             'pname'=>'required',
@@ -134,14 +134,12 @@ class ProductController extends Controller
              'quantity'=>'required|integer|min:1',
              'price'=>'required|integer|min:0',
              'photoURL'=>'required|image|max:2000',
-             'cate_id'=>'required|integer',
-             'userID'=>'required|integer|min:0'
-
+             'cate_id'=>'required|string',
     );
     $validator =  Validator::make($request->all(),$rule);
     if($validator->fails())
     {
-            return $validator->errors();
+            return response()->json(['error'=> true, 'message' => $validator->errors()]);
     }
     $path = Storage::disk('s3')->put('images/originals', $request->photoURL, 'public');
     $dataInsert = [
@@ -149,7 +147,7 @@ class ProductController extends Controller
         'description'=>$request->description,
         'quantity'=>$request->quantity,
         'price'=>$request->price,
-        'photoURL'=>$path,
+        'photoURL'=>env('AWS_S3_URL').'/'.$path,
         'userID'=> $userid,
         'cate_id'=>$request->cate_id
     ];
@@ -165,53 +163,31 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-
         if(Auth::check())
         {
             $userid = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=> true,'message'=>"Login to Continue"]);
         }
-        $productDelete = Product::firstOrFail($id);
-        if($productDelete->user->id != $userid ) return response()->json(['error' => 'Unauthorized'], 401);
+        $productDelete = Product::find($id);
+        if($productDelete->user->id != $userid ) return response()->json(['error' =>true,'message'=> 'Unauthorized'], 401);
 
         $productDelete->delete();
         return $id;
     }
-    public function suggestProdByCate(Request $request)
+    public function suggestProdByCate($id)
     {
-        
-        $rule= array(
-            'id'=>'required'
-        );
-
-       $validator =  Validator::make($request->all(),$rule);
-
-        if($validator->fails())
-        {
-              //  return $validator->errors();
-              return $request;
-        
-        }
-        $product = Product::where('id',$request->id)->first();
+        $product = Product::where('id',$id)->first();
         $productSugg = Product::where([['cate_id','=',$product->cate_id],['id','!=',$product->id]])->paginate(10);
-        return $productSugg;
+
+        return ProductResource::collection($productSugg);
 
     }
-    public function suggestProdByUser(Request $request)
+
+    public function suggestProdByUser($id)
     {
-        $rule= array(
-            'id'=>'required'
-        );
-
-       $validator =  Validator::make($request->all(),$rule);
-
-        if($validator->fails())
-        {
-                return $validator->errors();
-        }
-        $product = Product::where('id',$request->id)->first();
+        $product = Product::where('id',$id)->first();
         $productSugg = Product::where([['userID','=',$product->userID],['id','!=',$product->id]])->paginate(10);
         return $productSugg;
     }

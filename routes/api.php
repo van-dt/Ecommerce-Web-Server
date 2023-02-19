@@ -7,6 +7,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
 
 
 
@@ -37,33 +38,20 @@ Route::group([
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
     Route::post('/change-pass', [AuthController::class, 'changePassWord']);
 });
+// user
+Route::get('/user/{id}', [UserController::class, 'getUserDetail']);
 // upload image
 Route::post('/upload', [ImageController::class,'postUpload']);
 // categories
 Route::resource('/categories',CategoryController::class)->except(['create','edit']);
 // products
-Route::resource('/products',ProductController::class)->except(['create','edit']);
-// payments (payments crud la cart thong thuong, con show du thong tin payments se khac nha)
-Route::resource('/payments',PaymentController::class)->except(['create','edit']);
-//count cart
-Route::get('load-cart-data',[PaymentController::class,'cartcount']);
-// ajax cho cart neu can:
-// $.ajax(
-//     {
-//         method:"GET",
-//         url:"/load-cart-data",
-//         success:function(response)
-//         {
-//             $('.ten class').html();
-//             $('.ten class').html(response.count);
-            
-//         }
-
-//     }
-// );
-
+Route::resource('/products',ProductController::class)->except(['create','edit','update']);
+Route::post('/products/{id}',[ProductController::class,'update']);
+// payments
+Route::resource('/payments',PaymentController::class)->except(['index','create','edit']);
+Route::get('/payments',[PaymentController::class,'show']);
 //get products theo category
-Route::get('/products-by-cate',[ProductController::class,'suggestProdByCate']);
+Route::get('/products-by-cate/{id}',[ProductController::class,'suggestProdByCate']);
 Route::get('/products-by-user',[ProductController::class,'suggestProdByUser']);
 //get checkout (thong tin mua hang)
 Route::get('/checkout',[PaymentController::class,'checkout']);

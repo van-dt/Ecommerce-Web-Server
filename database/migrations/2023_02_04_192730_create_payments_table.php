@@ -14,9 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('payments', function (Blueprint $table) {
-
-            $table->integer('userID');
-            $table->integer('productID');
+            $table->increments('id');
+            $table->integer('userID')->unsigned();
+            $table->foreign('userID')->references('id')->on('users')->onDelete('cascade');
+            $table->integer('productID')->unsigned();
+            $table->foreign('productID')->references('id')->on('products')->onDelete('cascade');
             $table->integer('quantity');
             $table->tinyInteger('status');
             $table->tinyInteger('select');

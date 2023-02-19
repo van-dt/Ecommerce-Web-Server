@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -17,11 +18,11 @@ class PaymentController extends Controller
     {
         //
         $payments = Payment::paginate(15);
-        
-        return PaymentResource::collection($payments);
-   
 
-       
+        return PaymentResource::collection($payments);
+
+
+
     }
 
     /**
@@ -42,20 +43,21 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info(Auth::id());
         if(Auth::check())
         {
             $id = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=> true,'message'=>"Login to Continue"]);
         }
         $request->validate([
-           
+
             'productID'=>'required',
             'quantity'=>'required'
         ]
     );
-    $status =0;
+    $status =1;
     $select =0;
     $dataInsert = [
         'userID'=>$id,
@@ -63,12 +65,12 @@ class PaymentController extends Controller
         'quantity'=>$request->quantity,
         'status'=>$status,
         'select'=>$select
-        
+
     ];
-        
+
     $payments = DB::table('payments')->selectRaw('`userID`,`productID`,sum(quantity) as quantity')->where([['userID','=', $id],['productID','=',$request->productID]])->count();
     if($payments>0)
-    { 
+    {
         $productID = $request->productID;
         DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update(['quantity'=>$request->quantity]);
     }
@@ -95,14 +97,13 @@ class PaymentController extends Controller
         else{
             return response()->json(['status'=>"Login to Continue"]);
         }
-        $payments = DB::table('payments')->selectRaw('`userID`,`productID`,`quantity`,`select`')->where(['userID','=', $id],['status','=',0])->get();
-        $userName = DB::table('users')->selectRaw('`name`')->where('id', $id)->get();
+        $payments = DB::table('payments')->selectRaw('`id`,`userID`,`productID`,`quantity`,`select`,`status`')->where('userID','=', $id)->where('status','=',1)->get();
+        $userName = DB::table('users')->selectRaw('`name`')->where('id', $id)->first();
 
         foreach($payments as $payment)
         {
             $payment->userName = $userName;
-            $payment->productName = DB::table('products')->selectRaw('`pname`')->where('id', $payment->productID)->get();
-
+            $payment->product = DB::table('products')->selectRaw('`id`,`pname`,`description`,`price`,`quantity`,`photoURL`')->where('id', $payment->productID)->first();
         }
         return new PaymentResource($payments);
        // $product = Product::where('id', '=', $id)->get();
@@ -129,24 +130,23 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$productID)
+    public function update(Request $request,$id)
     {
         if(Auth::check())
         {
-            $id = Auth::id();
+            $userId = Auth::id();
         }
         else{
             return response()->json(['status'=>"Login to Continue"]);
         }
         $request->validate([
             'quantity'=>'required',
-            'select'=>'required'
         ]
     );
-    DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->update([['quantity'=>$request->quantity],['select'=>$request->select]]);
+    DB::table('payments')->where('id','=',$id)->update(['quantity'=>$request->quantity]);
 
-   
-   // return new PaymentResource($paymentUpdate);
+
+        return response()->json(['success'=> true]);
     }
 
     /**
@@ -155,19 +155,19 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($productID)
+    public function destroy($id)
     {
         if(Auth::check())
         {
-            $id = Auth::id();
+            $userid = Auth::id();
         }
         else{
             return response()->json(['status'=>"Login to Continue"]);
         }
-        
-     DB::table('payments')->where([['userID','=', $id],['productID','=',$productID]])->delete();
-     return $productID;
-        
+
+     DB::table('payments')->where('id','=', $id)->delete();
+     return response()->json(['success'=> true]);
+
     }
     public function cartcount()
     {
@@ -181,12 +181,12 @@ class PaymentController extends Controller
             $id = Auth::id();
         }
         else{
-            return response()->json(['status'=>"Login to Continue"]);
+            return response()->json(['error'=>true,'message'=>"Login to Continue"]);
         }
-        $checkout = Payment::where([['userID','=',$id],['select','=',1]])->get();
+        $checkout = Payment::where('userID','=',$id)->get();
         $user = User::where('id',Auth::id())->first();
 
-       
+
         foreach($checkout as $item)
         {
             $product= Product::where('id',$item->productID)->first();
@@ -199,14 +199,22 @@ class PaymentController extends Controller
     }
     public function Purchase(Request $request)
     {
-        if(Auth::user()->address==NULL)
+        if(Auth::check())
         {
-            $user = User::where('id',Auth::id())->first();
-            $user->address= $request->input('address');
+            $id = Auth::id();
+        }
+        else{
+            return response()->json(['error'=>true,'message'=>"Login to Continue"]);
+        }
+        if(Auth::user()->address!=$request->address)
+        {
+            $user = User::where('id','=',Auth::id())->first();
+            Log::info($user);
+            $user->address= $request->address;
             $user->update();
         }
-      Payment::where([['userID','=',Auth::id()],['select','=',1]])->update(['status'=>1]);
-
+      Payment::where('userID','=',Auth::id())->update(['status'=>2]);
+      return response()->json(['success'=> true]);
 
     }
 }
