@@ -68,4 +68,5 @@ Route::get('/products-by-user',[ProductController::class,'suggestProdByUser']);
 //get checkout (thong tin mua hang)
 Route::get('/checkout',[PaymentController::class,'checkout']);
 Route::post('/purchase',[PaymentController::class,'purchase']);
-
+/// search product by name
+Route::get('/search/{keyword}',[ProductController::class,'searchProducts']);

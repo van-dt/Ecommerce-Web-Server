@@ -215,5 +215,10 @@ class ProductController extends Controller
         $productSugg = Product::where([['userID','=',$product->userID],['id','!=',$product->id]])->paginate(10);
         return $productSugg;
     }
+    public function searchProducts($keyword)
+    {
+        $products = Product::where('pname','like',"%$keyword%")->get();
+        return $products;
+    }
 
 }
