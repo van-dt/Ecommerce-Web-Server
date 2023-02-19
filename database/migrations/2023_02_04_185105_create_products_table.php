@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreign('userID')->references('id')->on('users')->onDelete('cascade');
             $table->string( 'photoURL');
             $table->integer('cate_id');
+            $table->integer('feature_index')->default(-1);
 
             $table->timestamp('created_at')->default(now()->toDateTimeString());
             $table->timestamp('updated_at')->default(now()->toDateTimeString());

@@ -21,7 +21,7 @@ class ProductController extends Controller
     public function index()
     {
         Log::info('get all product');
-        $products = Product::paginate(15);
+        $products = Product::paginate(30);
 
         return ProductResource::collection($products);
    // $pr=  DB::select('select * from products where userID =?',[73]);
@@ -197,10 +197,9 @@ class ProductController extends Controller
         $products = Product::where('pname','like',"%$keyword%")->get();
         return $products;
     }
-    public function productsByCategory(Request $request)
+    public function productsByCategory($cate_id)
     {
-        $category = Category::where('name',$request->category)->first();
-        $products = Product::where('cate_id',$category->id)->paginate(15);
+        $products = Product::where('cate_id',$cate_id)->paginate(15);
         return $products;
     }
 
