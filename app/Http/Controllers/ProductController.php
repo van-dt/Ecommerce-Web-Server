@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
+use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -194,6 +195,12 @@ class ProductController extends Controller
     public function searchProducts($keyword)
     {
         $products = Product::where('pname','like',"%$keyword%")->get();
+        return $products;
+    }
+    public function productsByCategory(Request $request)
+    {
+        $category = Category::where('name',$request->category)->first();
+        $products = Product::where('cate_id',$category->id)->paginate(15);
         return $products;
     }
 

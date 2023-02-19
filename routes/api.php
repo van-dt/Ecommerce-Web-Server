@@ -58,3 +58,5 @@ Route::get('/checkout',[PaymentController::class,'checkout']);
 Route::post('/purchase',[PaymentController::class,'purchase']);
 /// search product by name
 Route::get('/search/{keyword}',[ProductController::class,'searchProducts']);
+// search by category
+Route:: get('/{category}',[ProductController::class,'productsByCategory']);
