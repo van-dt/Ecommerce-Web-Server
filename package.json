@@ -6,7 +6,8 @@
         "start": "php artisan serve",
         "migrate": "php artisan migrate:refresh",
         "build-image": "docker build -t ecommerce-server/laravel:v0 .",
-        "compose-install": "docker-compose exec laravel-app composer install && docker-compose exec laravel-app php artisan key:generate",
+        "compose-install": "docker-compose exec laravel-app composer install",
+        "compose-keygen": "docker-compose exec laravel-app php artisan key:generate",
         "server:dev": "docker compose up",
         "server": "docker compose up -d"
     },
